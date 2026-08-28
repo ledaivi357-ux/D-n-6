@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Kiểm Tra Trực Tuyến & Quản Lý</title>
+    <style>
+        :root {
+            --primary: #1a56db;
+            --primary-hover: #1e429f;
+            --bg: #f3f6f56c;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --border: #d1d5db;
+            --danger: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 850px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h2, h3 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            margin-top: 8px;
+        }
+
+        .btn-outline:hover {
+            background-color: #eff6ff;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .question-card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .question-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .options input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .rank-xuatsat { background-color: #d1fae5; color: #065f46; }
+        .rank-dat { background-color: #dbeafe; color: #1e40af; }
+        .rank-chuadat { background-color: #fee2e2; color: #991b1b; }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .user-info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 10px;
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .admin-table th, .admin-table td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-card div {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div id="auth-section">
+        <h2>ĐĂNG NHẬP / ĐĂNG KÝ THÍ SINH</h2>
+        <div id="auth-alert" class="alert"></div>
+        <form id="auth-form">
+            <div class="form-group">
+                <label for="phone">Số điện thoại (*):</label>
+                <input type="tel" id="phone" placeholder="Nhập số điện thoại" required pattern="[0-9]{10,11}">
+            </div>
+            <div class="form-group">
+                <label for="password">Mật khẩu (*):</label>
+                <input type="password" id="password" placeholder="Nhập mật khẩu" required minlength="4">
+            </div>
+
+            <div id="register-fields" class="hidden">
+                <div class="form-group">
+                    <label for="fullname">Họ và tên (*):</label>
+                    <input type="text" id="fullname" placeholder="Nhập họ và tên">
+                </div>
+                <div class="form-group">
+                    <label for="position">Chức vụ:</label>
+                    <input type="text" id="position" placeholder="Nhập chức vụ">
+                </div>
+                <div class="form-group">
+                    <label for="unit">Đơn vị công tác:</label>
+                    <input type="text" id="unit" placeholder="Nhập đơn vị công tác">
+                </div>
+            </div>
+
+            <button type="submit" id="btn-submit-auth" class="btn">Đăng nhập / Tiếp tục</button>
+            <button type="button" id="btn-go-admin" class="btn btn-outline">Đăng Nhập Quản Trị Viên (Admin)</button>
+        </form>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+        <div class="user-info-bar">
+            <div>
+                Xin chào: <strong id="display-name">---</strong> | Đơn vị: <span id="display-unit">---</span>
+            </div>
+            <button id="btn-logout" class="btn-outline" style="width: auto; padding: 4px 10px; margin:0;">Đăng xuất</button>
+        </div>
+
+        <h3>DANH SÁCH BÀI KIỂM TRA</h3>
+        <div id="dash-alert" class="alert"></div>
+
+        <div class="form-group">
+            <label for="quiz-select">Chọn bài kiểm tra:</label>
+            <select id="quiz-select">
+                <option value="qs1">Bài 1: Điều lệnh Đội ngũ</option>
+                <option value="qs2">Bài 2: Kỹ thuật Bắn súng Tiểu liên AK (Bài 1)</option>
+                <option value="qs3">Bài 3: Kỹ thuật Sử dụng Lựu đạn & Thuốc nổ</option>
+                <option value="qs4">Bài 4: Kỹ thuật Công sự chiến đấu & Ngụy trang</option>
+                <option value="qs5">Bài 5: Đội ngũ chiến thuật</option>
+                <option value="qs6">Bài 6: Hiểu biết chung về về phòng hóa </option>
+                <option value="qs7">Bài 7: Thể lực Quân sự & Vượt vật cản Kỹ thuật</option>
+                <option value="qs8">Bài 8: Trinh sát Quân sự & Địa hình Quân sự</option>
+                <option value="ct1">Bài 9: Công tác Đảng, Công tác Chính trị trong Quân đội</option>
+                <option value="ct2">Bài 10: Giáo dục Chính trị </option>
+            </select>
+        </div>
+
+        <button id="btn-start-quiz" class="btn">Bắt Đầu Làm Bài</button>
+
+        <h3 style="margin-top: 30px;">LỊCH SỬ LÀM BÀI CỦA BẠN</h3>
+        <div id="history-list">Chưa có dữ liệu làm bài.</div>
+    </div>
+
+    <div id="quiz-section" class="hidden">
+        <h3 id="quiz-title">BÀI KIỂM TRA</h3>
+        <p style="text-align: center; font-size: 13px; color: #6b7280; margin-bottom: 20px;">Lưu ý: Mỗi ngày bạn chỉ được kiểm tra 1 lần cho bài thi này.</p>
+        
+        <form id="quiz-form">
+            <div id="questions-container"></div>
+            <button type="submit" class="btn">Nộp Bài Kiểm Tra</button>
+        </form>
+    </div>
+
+    <div id="result-section" class="hidden">
+        <h3>KẾT QUẢ KIỂM TRA</h3>
+        <div id="result-box" class="result-box">
+            <h4 id="result-score" style="font-size: 20px; margin-bottom: 8px;">Số câu đúng: 0/10</h4>
+            <p id="result-rank" style="font-weight: bold; font-size: 18px;">Xếp loại: ---</p>
+        </div>
+        <button id="btn-back-dash" class="btn" style="margin-top: 20px;">Quay Về Trang Chủ</button>
+    </div>
+
+    <div id="admin-section" class="hidden">
+        <div class="user-info-bar">
+            <div><strong>TRANG QUẢN TRỊ VIÊN (ADMIN)</strong></div>
+            <button id="btn-admin-logout" class="btn-outline" style="width: auto; padding: 4px 10px; margin:0;">Thoát Admin</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">Tổng Lượt Thi<div id="st-total">0</div></div>
+            <div class="stat-card">Xuất Sắc<div id="st-xs" style="color: #065f46;">0</div></div>
+            <div class="stat-card">Đạt<div id="st-dat" style="color: #1e40af;">0</div></div>
+            <div class="stat-card">Chưa Đạt<div id="st-cd" style="color: #991b1b;">0</div></div>
+        </div>
+
+        <div class="filter-row">
+            <input type="text" id="admin-search" placeholder="Tìm theo Tên, SĐT, Đơn vị...">
+            <select id="admin-filter-quiz">
+                <option value="all">Tất cả bài thi</option>
+                <option value="qs1">Bài 1: Điều lệnh Đội ngũ</option>
+                <option value="qs2">Bài 2: Bắn súng AK</option>
+                <option value="qs3">Bài 3: Lựu đạn & Thuốc nổ</option>
+                <option value="qs4">Bài 4: Công sự ngụy trang</option>
+                <option value="qs5">Bài 5: Chiến thuật</option>
+                <option value="qs6">Bài 6: Phòng hóa </option>
+                <option value="qs7">Bài 7: Thể lực quân sự</option>
+                <option value="qs8">Bài 8: Địa hình quân sự</option>
+                <option value="ct1">Bài 9: CTĐ, CTCT</option>
+                <option value="ct2">Bài 10: Giáo dục chính trị</option>
+            </select>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Họ & Tên</th>
+                        <th>SĐT</th>
+                        <th>Đơn Vị / Chức Vụ</th>
+                        <th>Bài Thi</th>
+                        <th>Điểm</th>
+                        <th>Xếp Loại</th>
+                        <th>Ngày Thi</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const ADMIN_PASSWORD = "admin123";
+
+    // --- BỘ DỮ LIỆU 10 BÀI KIỂM TRA MỚI (8 QUÂN SỰ - 2 CHÍNH TRỊ) ---
+    const QUIZ_DATA = {
+        // --- 8 BÀI HUẤN LUYỆN QUÂN SỰ ---
+        qs1: {
+            title: "Bài 1: Điều lệnh Đội ngũ",
+            questions: [
+                { q: "Câu 1: Quân nhân có bao nhiêu chức trách chung?", a: ["8 chức trách", "10 chức trách", "12 chức trách", "14 chức trách"], correct: 1 },
+                { q: "Câu 2: Mười lời thề danh dự của quân nhân là quy định đối với đối tượng nào?", a: ["Toàn thể quân nhân", "Chỉ sĩ quan", "Chỉ hạ sĩ quan", "Chỉ quân nhân chuyên nghiệp"], correct: 0 },
+                { q: "Câu 3: Động tác chào bằng tay khi không đội mũ thực hiện thế nào?", a: ["Đưa tay lên thái dương", "Đưa tay phải nhanh nhất lên bướm lông mày phải", "Gật đầu", "Cúi chào"], correct: 1 },
+                { q: "Câu 4: Độ dài bước đi thường của quân nhân khi đi đều là bao nhiêu cm?", a: ["60 cm", "70 cm", "75 cm", "80 cm"], correct: 2 },
+                { q: "Câu 5: Tốc độ đi đều trong điều lệnh đội ngũ là bao nhiêu bước/phút?", a: ["100 bước/phút", "106 bước/phút", "110 bước/phút", "120 bước/phút"], correct: 1 },
+                { q: "Câu 6: Thời gian làm việc, học tập, sinh hoạt trong ngày do ai quy định?", a: ["Bộ trưởng Bộ Quốc phòng", "Tư lệnh Quân khu", "Trung đoàn trưởng", "Người chỉ huy trực tiếp"], correct: 0 },
+                { q: "Câu 7: Động tác giậm chân tại chỗ có độ cao bàn chân cách mặt đất bao nhiêu?", a: ["10 cm", "15 cm", "20 cm", "30 cm"], correct: 3 },
+                { q: "Câu 8: Khẩu lệnh 'ĐẰNG SAU - QUAY' thực hiện qua mấy nhịp?", a: ["1 nhịp", "2 nhịp", "3 nhịp", "4 nhịp"], correct: 1 },
+                { q: "Câu 9: Khi quân nhân gặp cấp trên phải thực hiện điều gì trước?", a: ["Xưng danh", "Báo cáo", "Chào theo điều lệnh", "Đứng nghiêm"], correct: 2 },
+                { q: "Câu 10: Xếp hàng ngang, cự ly giữa hai người bên cạnh là bao nhiêu?", a: ["20 cm", "50 cm (khuỷu tay chống hông)", "70 cm", "1 mét"], correct: 0 }
+            ]
+        },
+        qs2: {
+            title: "Bài 2: Kỹ thuật Bắn súng Tiểu liên AK (Bài 1)",
+            questions: [
+                { q: "Câu 1: Tầm bắn hiệu quả của súng tiểu liên AK đối với mục tiêu mặt đất là bao nhiêu mét?", a: ["300m", "400m", "500m", "800m"], correct: 1 },
+                { q: "Câu 2: Tốc độ bắn lý thuyết của súng tiểu liên AK là bao nhiêu phát/phút?", a: ["400 phát/phút", "600 phát/phút", "800 phát/phút", "1000 phát/phút"], correct: 1 },
+                { q: "Câu 3: Hộp tiếp đạn của súng AK tiêu chuẩn chứa bao nhiêu viên đạn?", a: ["20 viên", "30 viên", "40 viên", "75 viên"], correct: 1 },
+                { q: "Câu 4: Bắn súng AK bài 1 cự ly bắn là bao nhiêu mét?", a: ["50m", "100m", "150m", "200m"], correct: 1 },
+                { q: "Câu 5: Yếu tố nào quan trọng nhất quyết định đến độ chính xác khi bắn súng AK?", a: ["Giữ súng thăng bằng", "Áp má ngắm chuẩn", "Giữ thở và êm êm kết thúc phát bắn", "Tất cả các yếu tố trên"], correct: 3 },
+                { q: "Câu 6: Súng tiểu liên AK sử dụng cỡ đạn nào?", a: ["5.56x45mm", "7.62x39mm", "9x19mm", "12.7x108mm"], correct: 1 },
+                { q: "Câu 7: Đường ngắm cơ bản là đường thẳng từ mắt người ngắm qua đâu?", a: ["Qua khe thước ngắm đến điểm định ngắm", "Qua chính giữa mép trên khe thước ngắm đến đỉnh đầu đầu ngắm", "Qua đầu ngắm đến mục tiêu", "Qua lỗ thước ngắm"], correct: 1 },
+                { q: "Câu 8: Ở bài 1 bắn súng AK, tư thế bắn quy định là tư thế nào?", a: ["Đứng bắn", "Quỳ bắn", "Nằm bắn có bệ tựa", "Nằm bắn không bệ tựa"], correct: 2 },
+                { q: "Câu 9: Tốc độ đầu của đạn súng AK47 là bao nhiêu m/s?", a: ["710 m/s", "800 m/s", "900 m/s", "1000 m/s"], correct: 0 },
+                { q: "Câu 10: Khi bắn bài 1 súng AK, Bia số 7 đại diện cho mục tiêu nào?", a: ["Bia ngực", "Bia ẩn hiện", "Bia nằm", "Bia đầu"], correct: 0 }
+            ]
+        },
+        qs3: {
+            title: "Bài 3: Kỹ thuật Sử dụng Lựu đạn & Thuốc nổ",
+            questions: [
+                { q: "Câu 1: Lựu đạn phi pháo F1 có bán kính sát thương gây nguy hiểm là bao nhiêu mét?", a: ["5m", "10m", "20m", "50m"], correct: 2 },
+                { q: "Câu 2: Thời gian cháy chậm của ngòi nổ lựu đạn F1 từ khi rút chốt đến khi nổ là?", a: ["1 - 2 giây", "3.2 - 4.2 giây", "5 - 6 giây", "7 - 8 giây"], correct: 1 },
+                { q: "Câu 3: Động tác ném lựu đạn xa trúng đích yêu cầu kết hợp giữa các lực nào?", a: ["Lực tay", "Lực chân, lưng nảy và lực tay", "Lực bả vai", "Lực cổ tay"], correct: 1 },
+                { q: "Câu 4: Trọng lượng toàn bộ của lựu đạn F1 khoảng bao nhiêu gam?", a: ["300g", "450g", "600g", "1000g"], correct: 1 },
+                { q: "Câu 5: Thuốc nổ TNT có màu sắc đặc trưng ban đầu là gì?", a: ["Màu đen", "Màu vàng nhạt đến nâu nhạt", "Màu trắng xám", "Màu đỏ"], correct: 1 },
+                { q: "Câu 6: Tốc độ nổ của bánh thuốc nổ TNT khoảng bao nhiêu m/s?", a: ["3000 m/s", "4500 m/s", "6900 m/s", "9000 m/s"], correct: 2 },
+                { q: "Câu 7: Kíp nổ số 8 dùng trong quân sự thường kích nổ bằng cách nào?", a: ["Dây cháy chậm hoặc nổ điện", "Đập mạnh", "Đốt lửa trực tiếp", "Thả vào nước"], correct: 0 },
+                { q: "Câu 8: Khối lượng thỏi thuốc nổ bánh chuẩn quân sự phổ biến nhất là:", a: ["100g & 200g", "200g & 400g", "500g & 1kg", "1kg & 2kg"], correct: 1 },
+                { q: "Câu 9: Khi kiểm tra lựu đạn trước khi ném, điều nào cấm tuyệt đối?", a: ["Xem chốt an toàn", "Bóp bẩy mỏ vịt", "Tháo thử ngòi nổ không đúng quy định", "Lau chùi bên ngoài"], correct: 2 },
+                { q: "Câu 10: Tư thế ném lựu đạn đứng ném áp dụng khi nào?", a: ["Có công sự che chắn tốt", "Đang chạy tiến công", "Địa hình trống trải", "Khi ở sát địch"], correct: 0 }
+            ]
+        },
+        qs4: {
+            title: "Bài 4: Kỹ thuật Công sự chiến đấu & Ngụy trang",
+            questions: [
+                { q: "Câu 1: Công sự bắn của bộ binh chia làm mấy loại cơ bản?", a: ["Nằm bắn, Quỳ bắn, Đứng bắn", "Nằm bắn và Đứng bắn", "Công sự đơn và Công sự đôi", "Cả A và C"], correct: 3 },
+                { q: "Câu 2: Chiều sâu hố bắn của công sự ĐỨNG BẮN tính từ đáy hố lên mặt đất là bao nhiêu?", a: ["0.6m", "0.8m", "1.1m", "1.5m"], correct: 2 },
+                { q: "Câu 3: Mục đích chính của việc ngụy trang trong chiến đấu là gì?", a: ["Làm đẹp công sự", "Giấu kín mục tiêu, lừa địch", "Che mưa che nắng", "Tăng trọng lượng thiết bị"], correct: 1 },
+                { q: "Câu 4: Vật liệu ngụy trang tự nhiên tốt nhất là gì?", a: ["Bạt nhựa", "Cây lá tươi tại địa bàn", "Lưới thép", "Sơn xịt"], correct: 1 },
+                { q: "Câu 5: Nguyên tắc ngụy trang cây lá tươi là phải thay thế khi nào?", a: ["Cuối ngày", "Khi cây bắt đầu héo khô, đổi màu", "Sau 3 ngày", "Không cần thay"], correct: 1 },
+                { q: "Câu 6: Đất đào công sự thừa ra cần phải xử lý thế nào để không lộ vị trí?", a: ["Đổ đống cao", "San lấp ngụy trang phủ cỏ cây lên", "Để nguyên tại chỗ", "Vứt xuống sông"], correct: 1 },
+                { q: "Câu 7: Công sự nằm bắn có chiều sâu hố khoảng bao nhiêu cm?", a: ["10 - 20 cm", "20 - 30 cm", "40 - 50 cm", "60 - 80 cm"], correct: 1 },
+                { q: "Câu 8: Bề dày nắp công sự phòng tránh pháo binh tối thiểu bằng đất nén là:", a: ["20 cm", "40 - 60 cm", "1 mét", "2 mét"], correct: 1 },
+                { q: "Câu 9: Trong đêm tối, nguyên tắc ngụy trang ánh sáng là gì?", a: ["Mở đèn sáng", "Tuyệt đối không để phát tán ánh sáng, lửa", "Đốt lửa nhỏ", "Dùng đèn pin đỏ"], correct: 1 },
+                { q: "Câu 10: Dùng lưới ngụy trang hiệu quả nhất đối với loại mục tiêu nào?", a: ["Cá nhân", "Vũ khí khí tài lớn, xe cơ giới, công sự", "Súng ngắn", "Bào đài nhỏ"], correct: 1 }
+            ]
+        },
+        qs5: {
+            title: "Bài 5: Đội ngũ chiến thuật",
+            questions: [
+                { q: "Câu 1: Tổ bộ binh chiến đấu thường gồm có mấy người?", a: ["2 người", "3 người", "4 người", "5 người"], correct: 1 },
+                { q: "Câu 2: Các tư thế vận động cơ bản trên chiến trường gồm:", a: ["Bò, lê, trườn, vọt tiến", "Chạy, nhảy, bò", "Đi, đứng, nằm", "Trườn, leo, lăn"], correct: 0 },
+                { q: "Câu 3: Tư thế LÊ áp dụng khi vận động trong địa hình địa vật nào?", a: ["Che đỡ ngang tầm người quỳ", "Che đỡ ngang tầm người nằm, cận chiến", "Trống trải", "Địa hình cao"], correct: 1 },
+                { q: "Câu 4: Động tác VỌT TIẾN áp dụng khi nào?", a: ["Vượt qua địa hình trống trải hỏa lực địch khống chế", "Khi gần địch", "Khi băng qua suối", "Khi rút lui"], correct: 0 },
+                { q: "Câu 5: Quãng đường mỗi lần Vọt tiến dài khoảng bao nhiêu mét?", a: ["5 - 10m", "15 - 25m", "40 - 50m", "100m"], correct: 1 },
+                { q: "Câu 6: Khi phát hiện hỏa lực địch bắn chặn, chiến sĩ phải làm gì ngay?", a: ["Chạy ngược lại", "Nằm xuống lợi dụng địa hình che đỡ quan sát", "Đứng lại bắn trả", "Hô to kêu cứu"], correct: 1 },
+                { q: "Câu 7: Nhiệm vụ chính của chiến sĩ trong phục kích là gì?", a: ["Bí mật, bất ngờ tiêu diệt địch khi vào khu vực dự kiến", "Rút lui", "Phòng thủ", "Đào công sự kiên cố"], correct: 0 },
+                { q: "Câu 8: Hành động của tổ bộ binh khi đánh chiếm mục tiêu gồm:", a: ["Hiệp đồng chặt chẽ, chi viện hỏa lực, xung phong", "Mỗi người đánh một ngả", "Chờ cấp trên đến", "Đứng xa bắn vào"], correct: 0 },
+                { q: "Câu 9: Khi di chuyển ban đêm, chiến sĩ cần chú ý điều gì nhất?", a: ["Không gây tiếng động lớn, giữ khoảng cách quan sát", "Đi thật nhanh", "Bật đèn pin", "Nói chuyện trao đổi"], correct: 0 },
+                { q: "Câu 10: Khái niệm 'Địa hình che đỡ' là gì?", a: ["Che được tầm nhìn và chống được đạn đạn nổ", "Chỉ che được tầm nhìn địch", "Chỉ che mưa", "Địa hình bằng phẳng"], correct: 0 }
+            ]
+        },
+        qs6: {
+            title: "Bài 6: Hiểu biết chung về vũ khí hóa học",
+            questions: [
+                { q: "Câu 1: Mặt nạ phòng độc quân sự dùng để bảo vệ cơ quan nào?", a: ["Mắt, mũi, miệng, hệ hô hấp, da mặt", "Chỉ bảo vệ mắt", "Chỉ bảo vệ phổi", "Toàn thân"], correct: 0 },
+                { q: "Câu 2: Tín hiệu báo động khi địch sử dụng vũ khí hóa học là gì?", a: ["Tiếng chuông dồn dập hoặc tín hiệu còi, lệnh báo động", "Đốt khói", "Bắn súng chỉ thiên", "Treo cờ trắng"], correct: 0 },
+                { q: "Câu 3: Chất độc quân sự nhóm thần kinh tiêu biểu là loại nào?", a: ["Sarin, VX", "Yperite", "CS", "Phosgene"], correct: 0 },
+                { q: "Câu 4: Khi bị chất độc dính vào da, hành động đầu tiên cần làm là:", a: ["Dùng bộ tẩy độc cá nhân xử lý ngay", "Rửa bằng nước đường", "Lau bằng giẻ khô", "Mặc kệ"], correct: 0 },
+                { q: "Câu 5: Bình chữa cháy bột MFZ4 chữa đám cháy hiệu quả nhất với chất nào?", a: ["Khí gas, xăng dầu, điện", "Kim loại", "Hóa chất nổ", "Giấy vụn"], correct: 0 },
+                { q: "Câu 6: Khi di chuyển thoát khỏi vùng có chất độc độc hại khói độc nên đi hướng nào?", a: ["Vuông góc hoặc ngược chiều gió", "Cùng chiều gió", "Đứng yên", "Chạy xuống thung lũng"], correct: 0 },
+                { q: "Câu 7: Thời gian mang mặt nạ phòng độc tiêu chuẩn của quân nhân là dưới bao nhiêu giây?", a: ["10 giây", "15 giây", "20 giây", "30 giây"], correct: 0 },
+                { q: "Câu 8: Cấp cứu người bị ngạt khí CO2/CO cần đưa ngay ra đâu?", a: ["Nơi thoáng khí, hô hấp nhân tạo nếu cần", "Phòng kín", "Đổ nước lạnh vào mặt", "Cho uống sữa"], correct: 0 },
+                { q: "Câu 9: Áo bạt phòng hóa poncho có tác dụng chính là gì?", a: ["Bảo vệ da chống giọt bám chất độc và bụi phóng xạ", "Giữ ấm", "Ngụy trang", "Chống đạn bắn"], correct: 0 },
+                { q: "Câu 10: Chất độc CS thuộc nhóm chất độc nào?", a: ["Chất độc gây kích thích, kích nước mắt", "Chất độc toàn thân", "Chất độc loét da", "Chất độc tâm thần"], correct: 0 }
+            ]
+        },
+        qs7: {
+            title: "Bài 7: Thể lực Quân sự & Vượt vật cản Kỹ thuật",
+            questions: [
+                { q: "Câu 1: Môn thể thao rèn luyện thể lực cơ bản bắt buộc của chiến sĩ gồm:", a: ["Co tay xà đơn, chạy 100m, chạy 3000m", "Bóng đá, bóng chuyền", "Bơi lội", "Bắn súng"], correct: 0 },
+                { q: "Câu 2: Tiêu chuẩn Co tay xà đơn ĐẠT yêu cầu đối với nam quân nhân trẻ tối thiểu là mấy lần?", a: ["3 lần", "6 lần", "10 lần", "15 lần"], correct: 1 },
+                { q: "Câu 3: Chạy vũ trang 3000m mang theo trang bị gì?", a: ["Súng AK, bao đạn, bình nước", "Quần áo thể thao", "Balo nặng 25kg", "Không mang gì"], correct: 0 },
+                { q: "Câu 4: Vượt bãi vật cản K73 gồm bao nhiêu vật cản tiêu chuẩn?", a: ["5 vật cản", "7 vật cản", "9 vật cản", "12 vật cản"], correct: 2 },
+                { q: "Câu 5: Tác dụng của bài tập nhảy xa, nhảy cao trong huấn luyện thể lực là:", a: ["Phát triển sức bật đôi chân và sự dẻo dai", "Tăng chiều cao", "Rèn luyện tay", "Tăng thị lực"], correct: 0 },
+                { q: "Câu 6: Khi thực hiện nhảy ngã trong kỹ thuật vượt vật cản, điểm tiếp đất đầu tiên là:", a: ["Mũi bàn chân, khuỵu gối gập người", "Gót chân", "Mông", "Đầu gối"], correct: 0 },
+                { q: "Câu 7: Thời gian chạy 100m đạt loại Giỏi đối với quân nhân nam là dưới bao nhiêu giây?", a: ["12.5 giây", "13.5 giây", "14.5 giây", "16 giây"], correct: 1 },
+                { q: "Câu 8: Bơi vũ trang quân sự sử dụng kiểu bơi nào phổ biến nhất?", a: ["Bơi ếch, bơi trườn sấp", "Bơi ngửa", "Bơi bướm", "Bơi chó"], correct: 0 },
+                { q: "Câu 9: Trước khi luyện tập thể lực cường độ cao, khâu nào tuyệt đối không bỏ qua?", a: ["Khởi động kỹ toàn thân", "Uống nhiều nước", "Ăn thật no", "Nằm nghỉ"], correct: 0 },
+                { q: "Câu 10: Mục đích của hội thao thể lực quân sự là:", a: ["Rèn luyện sức khỏe, ý chí chiến đấu cho bộ đội", "Giải trí", "Tính điểm thi đua", "Tăng trọng lượng"], correct: 0 }
+            ]
+        },
+        qs8: {
+            title: "Bài 8: Trinh sát Quân sự & Địa hình Quân sự",
+            questions: [
+                { q: "Câu 1: Bản đồ quân sự tỷ lệ 1:25.000 có 1 cm trên bản đồ bằng bao nhiêu mét ngoài thực địa?", a: ["25m", "250m", "2500m", "25.000m"], correct: 1 },
+                { q: "Câu 2: Kim Nam cực của La bàn quân sự luôn chỉ về hướng nào?", a: ["Hướng Bắc", "Hướng Nam", "Hướng Đông", "Hướng Tây"], correct: 1 },
+                { q: "Câu 3: Ký hiệu đường đồng mức trên bản đồ địa hình dùng để thể hiện yếu tố nào?", a: ["Đường giao thông", "Dáng đất, độ cao địa hình", "Sông hồ", "Ranh giới hành chính"], correct: 1 },
+                { q: "Câu 4: Để xác định hướng Bắc ban đêm khi không có la bàn, người ta dựa vào sao nào?", a: ["Sao Bắc Đẩu (Polaris)", "Sao Hôm", "Sao Mai", "Mặt Trăng"], correct: 0 },
+                { q: "Câu 5: Góc gạch hướng (Góc phương vị) là góc tính từ hướng Bắc theo chiều nào?", a: ["Chiều kim đồng hồ", "Ngược chiều kim đồng hồ", "Thẳng đứng", "Tùy chọn"], correct: 0 },
+                { q: "Câu 6: Định hướng bản đồ ra thực địa là làm cho hướng Bắc bản đồ song song với:", a: ["Hướng Bắc thực địa", "Hướng con đường", "Hướng dòng sông", "Hướng mặt trời mọc"], correct: 0 },
+                { q: "Câu 7: Đo cự ly trên bản đồ bằng thước milimét sau đó nhân với yếu tố nào?", a: ["Mẫu số tỷ lệ bản đồ", "Chiều dài bản đồ", "Tọa độ X", "Tọa độ Y"], correct: 0 },
+                { q: "Câu 8: Tọa độ ô 4 ô trên bản đồ quân sự đọc số ô ngang (X) trước hay ô dọc (Y) trước?", a: ["Ô ngang (X) trước, ô dọc (Y) sau", "Ô dọc trước", "Số nào lớn đọc trước", "Tùy ý"], correct: 0 },
+                { q: "Câu 9: Ký hiệu màu XANH LÁ CÂY trên bản đồ quân sự thể hiện yếu tố địa hình nào?", a: ["Thảm thực vật, rừng cây", "Thủy văn (sông hồ)", "Dân cư", "Đường đi"], correct: 0 },
+                { q: "Câu 10: Vật thể cao 10m quan sát ở cự ly 1km dưới góc ngắm là bao nhiêu ly li chéo?", a: ["10 ly li", "1 ly li", "100 ly li", "0.1 ly li"], correct: 0 }
+            ]
+        },
+
+        // --- 2 BÀI CÔNG TÁC ĐẢNG - CÔNG TÁC CHÍNH TRỊ ---
+        ct1: {
+            title: "Bài 9: Công tác Đảng, Công tác Chính trị trong Quân đội",
+            questions: [
+                { q: "Câu 1: Nguyên tắc tổ chức cơ bản nhất của Đảng Cộng sản Việt Nam là gì?", a: ["Tập trung dân chủ", "Tự phê bình và phê bình", "Đoàn kết thống nhất", "Liên hệ mật thiết với nhân dân"], correct: 0 },
+                { q: "Câu 2: Quân đội nhân dân Việt Nam đặt dưới sự lãnh đạo như thế nào của Đảng?", a: ["Tuyệt đối, trực tiếp về mọi mặt", "Gián tiếp", "Chỉ về mặt quân sự", "Phối hợp lãnh đạo"], correct: 0 },
+                { q: "Câu 3: Cơ quan đảm nhiệm Công tác Đảng, công tác chính trị trong toàn quân là:", a: ["Tổng cục Chính trị", "Bộ Tổng Tham mưu", "Tổng cục Hậu cần", "Tổng cục Kỹ thuật"], correct: 0 },
+                { q: "Câu 4: Nền tảng tư tưởng, kim chỉ nam cho mọi hành động của Đảng và Quân đội là gì?", a: ["Chủ nghĩa Mác - Lênin và Tư tưởng Hồ Chí Minh", "Truyền thống đánh giặc", "Kinh nghiệm thực tiễn", "Các văn bản pháp luật"], correct: 0 },
+                { q: "Câu 5: Tổ chức Đảng cơ sở ở cấp Đại đội thường là hình thức nào?", a: ["Chi bộ cơ sở / Chi bộ trực thuộc", "Đảng bộ cơ sở", "Đảng bộ bộ phận", "Tổ Đảng"], correct: 0 },
+                { q: "Câu 6: Sinh hoạt Chi bộ định kỳ thường tổ chức mỗi tháng mấy lần?", a: ["1 lần/tháng", "2 lần/tháng", "3 tháng 1 lần", "6 tháng 1 lần"], correct: 0 },
+                { q: "Câu 7: Mối quan hệ giữa Chính ủy/Chính trị viên với Người chỉ huy quân sự là mối quan hệ gì?", a: ["Phối hợp, hiệp đồng công tác vì nhiệm vụ chung", "Cấp trên - cấp dưới", "Độc lập hoàn toàn", "Chỉ đạo trực tiếp"], correct: 0 },
+                { q: "Câu 8: Bản chất của Quân đội nhân dân Việt Nam là gì?", a: ["Bản chất giai cấp công nhân, tính dân tộc và tính nhân dân sâu sắc", "Bản chất nông dân", "Bản chất trí thức", "Mang tính trung lập"], correct: 0 },
+                { q: "Câu 9: Phẩm chất cao đẹp của người quân nhân cách mạng được nhân dân khen tặng là gì?", a: ["Bộ đội Cụ Hồ", "Chiến sĩ thi đua", "Anh hùng lực lượng vũ trang", "Dũng sĩ diệt đồn"], correct: 0 },
+                { q: "Câu 10: Nội dung phong trào thi đua xuyên suốt trong Quân đội là phong trào nào?", a: ["Thi đua Quyết thắng", "Thi đua Dạy tốt học tốt", "Thi đua Lao động giỏi", "Thi đua Cải tiến kỹ thuật"], correct: 0 }
+            ]
+        },
+        ct2: {
+            title: "Bài 10: Giáo dục Chính trị & Quản lý Tư tưởng Bộ đội",
+            questions: [
+                { q: "Câu 1: Mục đích quan trọng nhất của giáo dục chính trị tại đơn vị là gì?", a: ["Xây dựng bản lĩnh chính trị vững vàng, tin tưởng tuyệt đối vào sự lãnh đạo của Đảng", "Để tính điểm thi đua", "Gia tăng quân số", "Cho đủ chương trình"], correct: 0 },
+                { q: "Câu 2: Phương châm quản lý tư tưởng bộ đội ở đơn vị cơ sở là gì?", a: ["Nắm, quản, dự báo, định hướng và giải quyết tư tưởng", "Phạt nặng khi vi phạm", "Bỏ qua lỗi nhỏ", "Chờ cấp trên giải quyết"], correct: 0 },
+                { q: "Câu 3: Việc nắm tình hình tư tưởng cán bộ, chiến sĩ phải thông qua những kênh nào?", a: ["Trực tiếp sinh hoạt, học tập, công tác, lắng nghe ý kiến và qua gia đình, đồng đội", "Chỉ qua báo cáo văn bản", "Qua lời đồn", "Khi có vụ việc mới nắm"], correct: 0 },
+                { q: "Câu 4: Hình thức giáo dục chính trị cơ bản tại đơn vị đối với hạ sĩ quan, binh sĩ bao gồm:", a: ["Học tập bài giảng, học tập chuyên đề, sinh hoạt ngày chính trị văn hóa tinh thần", "Đọc sách tự do", "Chỉ nghe đài", "Chỉ kiểm tra viết"], correct: 0 },
+                { q: "Câu 5: 'Ngày Chính trị và Văn hóa tinh thần' ở cấp đại đội/tiểu đoàn thường được tổ chức khi nào?", a: ["1 lần / tháng", "1 lần / tuần", "1 lần / quý", "1 lần / năm"], correct: 0 },
+                { q: "Câu 6: Trách nhiệm quản lý tư tưởng bộ đội thuộc về ai?", a: ["Cấp ủy, người chỉ huy, chính trị viên và toàn thể cán bộ các cấp", "Chỉ riêng Chính trị viên", "Chỉ riêng Cấp trưởng", "Chỉ riêng Y sĩ"], correct: 0 },
+                { q: "Câu 7: Khi phát hiện quân nhân có dấu hiệu diễn biến tư tưởng tiêu cực, cán bộ phải:", a: ["Gặp gỡ động viên, tìm hiểu nguyên nhân và có biện pháp hỗ trợ giúp đỡ kịp thời", "Phê bình công khai trước đơn vị", "Trả về gia đình", "Nhốt lại"], correct: 0 },
+                { q: "Câu 8: Tiêu chuẩn gia đình văn hóa, đơn vị văn hóa trong Quân đội gắn liền với cuộc vận động nào?", a: ["Xây dựng môi trường văn hóa tốt đẹp, lành mạnh trong các đơn vị quân đội", "Vận động trồng cây", "Vận động tiết kiệm", "Vận động thể thao"], correct: 0 },
+                { q: "Câu 9: Tự phê bình và phê bình trong Đảng phải dựa trên tinh thần nào?", a: ["Trung thực, thẳng thắn, tình đồng chí thương yêu lẫn nhau", "Bới móc cá nhân", "Áp đặt chỉ tiêu", "Thù hằn"], correct: 0 },
+                { q: "Câu 10: Xếp loại kết quả kiểm tra giáo dục chính trị năm gồm các mức nào?", a: ["Giỏi, Khá, Đạt (Trung bình), Không đạt (Yếu)", "Xuất sắc, Trung bình", "Đạt và Không đạt", "A, B, C, D"], correct: 0 }
+            ]
+        }
+    };
+
+    let currentUser = null;
+    let currentQuizKey = null;
+
+    function getUsersData() {
+        return JSON.parse(localStorage.getItem('app_users') || '{}');
+    }
+
+    function saveUsersData(data) {
+        localStorage.setItem('app_users', JSON.stringify(data));
+    }
+
+    function getTodayString() {
+        const today = new Date();
+        return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    }
+
+    // --- ĐĂNG NHẬP / ĐĂNG KÝ THÍ SINH ---
+    const authForm = document.getElementById('auth-form');
+    const phoneInput = document.getElementById('phone');
+    const registerFields = document.getElementById('register-fields');
+    const authAlert = document.getElementById('auth-alert');
+
+    phoneInput.addEventListener('input', () => {
+        const phone = phoneInput.value.trim();
+        const users = getUsersData();
+        if (phone.length >= 10) {
+            if (!users[phone]) {
+                registerFields.classList.remove('hidden');
+                document.getElementById('fullname').required = true;
+            } else {
+                registerFields.classList.add('hidden');
+                document.getElementById('fullname').required = false;
+            }
+        }
+    });
+
+    authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const phone = phoneInput.value.trim();
+        const password = document.getElementById('password').value.trim();
+        const users = getUsersData();
+
+        authAlert.style.display = 'none';
+
+        if (users[phone]) {
+            if (users[phone].password === password) {
+                currentUser = users[phone];
+                showDashboard();
+            } else {
+                authAlert.innerText = "Mật khẩu không chính xác!";
+                authAlert.style.display = 'block';
+            }
+        } else {
+            const fullname = document.getElementById('fullname').value.trim();
+            const position = document.getElementById('position').value.trim() || 'Chưa cập nhật';
+            const unit = document.getElementById('unit').value.trim() || 'Chưa cập nhật';
+
+            if (!fullname) {
+                authAlert.innerText = "Vui lòng nhập họ và tên khi đăng ký!";
+                authAlert.style.display = 'block';
+                return;
+            }
+
+            const newUser = {
+                phone: phone,
+                password: password,
+                fullname: fullname,
+                position: position,
+                unit: unit,
+                history: []
+            };
+
+            users[phone] = newUser;
+            saveUsersData(users);
+            currentUser = newUser;
+            showDashboard();
+        }
+    });
+
+    // --- MÀN HÌNH DASHBOARD THÍ SINH ---
+    function showDashboard() {
+        hideAllSections();
+        document.getElementById('dashboard-section').classList.remove('hidden');
+
+        document.getElementById('display-name').innerText = `${currentUser.fullname} (${currentUser.position})`;
+        document.getElementById('display-unit').innerText = currentUser.unit;
+        document.getElementById('dash-alert').style.display = 'none';
+
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const historyContainer = document.getElementById('history-list');
+        if (!currentUser.history || currentUser.history.length === 0) {
+            historyContainer.innerHTML = "<p style='color: #6b7280;'>Chưa có lịch sử làm bài.</p>";
+            return;
+        }
+
+        let html = '';
+        currentUser.history.slice().reverse().forEach(item => {
+            html += `
+                <div class="history-item">
+                    <strong>${item.quizTitle}</strong><br>
+                    Ngày làm: ${item.date} | Kết quả: <strong>${item.score}/10</strong> câu (${item.rank})
+                </div>
+            `;
+        });
+        historyContainer.innerHTML = html;
+    }
+
+    document.getElementById('btn-start-quiz').addEventListener('click', () => {
+        const selectedQuiz = document.getElementById('quiz-select').value;
+        const today = getTodayString();
+        const dashAlert = document.getElementById('dash-alert');
+
+        const hasTakenToday = currentUser.history.some(item => item.quizKey === selectedQuiz && item.date === today);
+
+        if (hasTakenToday) {
+            dashAlert.innerText = "Bạn đã thực hiện bài kiểm tra này trong ngày hôm nay rồi! Mỗi ngày chỉ được thi 1 lần.";
+            dashAlert.style.display = 'block';
+            return;
+        }
+
+        startQuiz(selectedQuiz);
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        currentUser = null;
+        document.getElementById('auth-form').reset();
+        registerFields.classList.add('hidden');
+        hideAllSections();
+        document.getElementById('auth-section').classList.remove('hidden');
+    });
+
+    // --- LÀM BÀI & CHẤM ĐIỂM ---
+    function startQuiz(quizKey) {
+        currentQuizKey = quizKey;
+        const quiz = QUIZ_DATA[quizKey];
+
+        hideAllSections();
+        document.getElementById('quiz-section').classList.remove('hidden');
+        document.getElementById('quiz-title').innerText = quiz.title.toUpperCase();
+
+        const container = document.getElementById('questions-container');
+        let html = '';
+
+        quiz.questions.forEach((q, idx) => {
+            html += `
+                <div class="question-card">
+                    <div class="question-title">${q.q}</div>
+                    <div class="options">
+                        ${q.a.map((opt, optIdx) => `
+                            <label>
+                                <input type="radio" name="q_${idx}" value="${optIdx}" required>
+                                ${opt}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    document.getElementById('quiz-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const quiz = QUIZ_DATA[currentQuizKey];
+        let correctCount = 0;
+
+        quiz.questions.forEach((q, idx) => {
+            const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
+            if (selected && parseInt(selected.value) === q.correct) {
+                correctCount++;
+            }
+        });
+
+        let rank = "";
+        let rankClass = "";
+
+        // Quy định xếp loại: 1-5: Chưa đạt | 6-8: Đạt | 9-10: Hoàn thành xuất sắc
+        if (correctCount >= 9) {
+            rank = "HOÀN THÀNH XUẤT SẮC";
+            rankClass = "rank-xuatsat";
+        } else if (correctCount >= 6) {
+            rank = "ĐẠT";
+            rankClass = "rank-dat";
+        } else {
+            rank = "CHƯA ĐẠT";
+            rankClass = "rank-chuadat";
+        }
+
+        const resultItem = {
+            id: Date.now(),
+            quizKey: currentQuizKey,
+            quizTitle: quiz.title,
+            score: correctCount,
+            rank: rank,
+            date: getTodayString()
+        };
+
+        currentUser.history.push(resultItem);
+
+        const users = getUsersData();
+        users[currentUser.phone] = currentUser;
+        saveUsersData(users);
+
+        hideAllSections();
+        document.getElementById('result-section').classList.remove('hidden');
+
+        document.getElementById('result-score').innerText = `Số câu trả lời đúng: ${correctCount}/10`;
+        document.getElementById('result-rank').innerText = `Xếp loại: ${rank}`;
+        document.getElementById('result-box').className = "result-box " + rankClass;
+    });
+
+    document.getElementById('btn-back-dash').addEventListener('click', () => {
+        showDashboard();
+    });
+
+    // --- QUẢN TRỊ VIÊN (ADMIN) ---
+    document.getElementById('btn-go-admin').addEventListener('click', () => {
+        const pwd = prompt("Nhập mật khẩu Quản trị viên (Mặc định: Thạnh Bình):");
+        if (pwd === ADMIN_PASSWORD) {
+            showAdminDashboard();
+        } else if (pwd !== null) {
+            alert("Mật khẩu Quản trị viên không đúng!");
+        }
+    });
+
+    function showAdminDashboard() {
+        hideAllSections();
+        document.getElementById('admin-section').classList.remove('hidden');
+        renderAdminData();
+    }
+
+    function renderAdminData() {
+        const users = getUsersData();
+        const tbody = document.getElementById('admin-table-body');
+        const searchKeyword = document.getElementById('admin-search').value.toLowerCase();
+        const quizFilter = document.getElementById('admin-filter-quiz').value;
+
+        let allRecords = [];
+        let total = 0, xs = 0, dat = 0, cd = 0;
+
+        Object.values(users).forEach(u => {
+            if (u.history) {
+                u.history.forEach(h => {
+                    allRecords.push({
+                        phone: u.phone,
+                        fullname: u.fullname,
+                        unit: u.unit,
+                        position: u.position,
+                        ...h
+                    });
+                });
+            }
+        });
+
+        let filteredRecords = allRecords.filter(r => {
+            const matchSearch = r.fullname.toLowerCase().includes(searchKeyword) ||
+                                r.phone.includes(searchKeyword) ||
+                                r.unit.toLowerCase().includes(searchKeyword);
+            const matchQuiz = (quizFilter === 'all') || (r.quizKey === quizFilter);
+            return matchSearch && matchQuiz;
+        });
+
+        filteredRecords.forEach(r => {
+            total++;
+            if (r.rank === 'HOÀN THÀNH XUẤT SẮC') xs++;
+            else if (r.rank === 'ĐẠT') dat++;
+            else cd++;
+        });
+
+        document.getElementById('st-total').innerText = total;
+        document.getElementById('st-xs').innerText = xs;
+        document.getElementById('st-dat').innerText = dat;
+        document.getElementById('st-cd').innerText = cd;
+
+        if (filteredRecords.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Không có dữ liệu lượt thi nào.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filteredRecords.map(r => `
+            <tr>
+                <td><strong>${r.fullname}</strong></td>
+                <td>${r.phone}</td>
+                <td>${r.unit} (${r.position})</td>
+                <td>${r.quizTitle}</td>
+                <td><strong>${r.score}/10</strong></td>
+                <td>${r.rank}</td>
+                <td>${r.date}</td>
+                <td><button onclick="deleteRecord('${r.phone}', ${r.id})" class="btn-danger">Xóa</button></td>
+            </tr>
+        `).join('');
+    }
+
+    document.getElementById('admin-search').addEventListener('input', renderAdminData);
+    document.getElementById('admin-filter-quiz').addEventListener('change', renderAdminData);
+
+    window.deleteRecord = function(phone, recordId) {
+        if (confirm("Bạn có chắc chắn muốn xóa lượt thi này không?")) {
+            const users = getUsersData();
+            if (users[phone]) {
+                users[phone].history = users[phone].history.filter(h => h.id !== recordId);
+                saveUsersData(users);
+                renderAdminData();
+            }
+        }
+    };
+
+    document.getElementById('btn-admin-logout').addEventListener('click', () => {
+        hideAllSections();
+        document.getElementById('auth-section').classList.remove('hidden');
+    });
+
+    function hideAllSections() {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('result-section').classList.add('hidden');
+        document.getElementById('admin-section').classList.add('hidden');
+    }
+</script>
+
+</body>
+</html>
